@@ -133,12 +133,75 @@
   </head>
   <body>
     <div id="root"></div>
-    <footer class="tx-footer-credit">
-  <span>Built by</span>
-  <a href="https://technical-x.com" target="_blank" rel="noopener" aria-label="Technical X">
-    <img src="/images/logo-footer.webp" alt="Technical X">
-  </a>
-  <span>© 2016 yourevcharge.com</span>
-</footer>
+
+<script>
+  function fixMobileChargerImage() {
+    if (window.innerWidth > 720) return;
+
+    const img = document.querySelector('.story-mobile-image img[src*="Charger.png"]');
+    if (!img) return;
+
+    const box = img.closest('.story-mobile-image');
+    if (!box) return;
+
+    box.style.setProperty('height', 'auto', 'important');
+    box.style.setProperty('min-height', '0', 'important');
+    box.style.setProperty('background', '#d8d3ca', 'important');
+    box.style.setProperty('overflow', 'hidden', 'important');
+    box.style.setProperty('display', 'block', 'important');
+
+    img.style.setProperty('width', '100%', 'important');
+    img.style.setProperty('height', 'auto', 'important');
+    img.style.setProperty('max-height', 'none', 'important');
+    img.style.setProperty('object-fit', 'contain', 'important');
+    img.style.setProperty('object-position', 'center center', 'important');
+    img.style.setProperty('background', '#d8d3ca', 'important');
+    img.style.setProperty('transform', 'none', 'important');
+  }
+
+  window.addEventListener('load', fixMobileChargerImage);
+  window.addEventListener('resize', fixMobileChargerImage);
+
+  const observer = new MutationObserver(fixMobileChargerImage);
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  setTimeout(fixMobileChargerImage, 300);
+  setTimeout(fixMobileChargerImage, 1000);
+</script>
+
+<script>
+  function fixOriginalFooterCredit() {
+    const footerBottom =
+      document.querySelector('.footer-bottom') ||
+      document.querySelector('.footer .footer-bottom');
+
+    if (!footerBottom) return;
+
+    footerBottom.innerHTML = `
+      <p class="custom-footer-line">
+        <span>Built by</span>
+        <a href="https://technical-x.com" target="_blank" rel="noopener" aria-label="Technical X">
+          <img src="/images/logo-footer.webp" alt="Technical X">
+        </a>
+        <span>© 2016 yourevcharge.com</span>
+      </p>
+    `;
+  }
+
+  window.addEventListener('load', fixOriginalFooterCredit);
+
+  const footerObserver = new MutationObserver(fixOriginalFooterCredit);
+  footerObserver.observe(document.getElementById('root'), {
+    childList: true,
+    subtree: true
+  });
+
+  setTimeout(fixOriginalFooterCredit, 300);
+  setTimeout(fixOriginalFooterCredit, 1000);
+</script>
+
   </body>
 </html>
