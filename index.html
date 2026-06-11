@@ -134,74 +134,88 @@
   <body>
     <div id="root"></div>
 
-<script>
-  function fixMobileChargerImage() {
-    if (window.innerWidth > 720) return;
+    <script>
+      (() => {
+        const applyMobileChargerFix = () => {
+          if (window.innerWidth > 720) return false;
 
-    const img = document.querySelector('.story-mobile-image img[src*="Charger.png"]');
-    if (!img) return;
+          const img = document.querySelector('.story-mobile-image img[src*="Charger.png"]');
+          if (!img) return false;
 
-    const box = img.closest('.story-mobile-image');
-    if (!box) return;
+          const box = img.closest('.story-mobile-image');
+          if (!box) return false;
 
-    box.style.setProperty('height', 'auto', 'important');
-    box.style.setProperty('min-height', '0', 'important');
-    box.style.setProperty('background', '#d8d3ca', 'important');
-    box.style.setProperty('overflow', 'hidden', 'important');
-    box.style.setProperty('display', 'block', 'important');
+          box.style.setProperty('height', 'auto', 'important');
+          box.style.setProperty('min-height', '0', 'important');
+          box.style.setProperty('background', '#d8d3ca', 'important');
+          box.style.setProperty('overflow', 'hidden', 'important');
+          box.style.setProperty('display', 'block', 'important');
 
-    img.style.setProperty('width', '100%', 'important');
-    img.style.setProperty('height', 'auto', 'important');
-    img.style.setProperty('max-height', 'none', 'important');
-    img.style.setProperty('object-fit', 'contain', 'important');
-    img.style.setProperty('object-position', 'center center', 'important');
-    img.style.setProperty('background', '#d8d3ca', 'important');
-    img.style.setProperty('transform', 'none', 'important');
-  }
+          img.style.setProperty('width', '100%', 'important');
+          img.style.setProperty('height', 'auto', 'important');
+          img.style.setProperty('max-height', 'none', 'important');
+          img.style.setProperty('object-fit', 'contain', 'important');
+          img.style.setProperty('object-position', 'center center', 'important');
+          img.style.setProperty('background', '#d8d3ca', 'important');
+          img.style.setProperty('transform', 'none', 'important');
 
-  window.addEventListener('load', fixMobileChargerImage);
-  window.addEventListener('resize', fixMobileChargerImage);
+          return true;
+        };
 
-  const observer = new MutationObserver(fixMobileChargerImage);
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
+        const applyFooterCreditFix = () => {
+          const footerBottom = document.querySelector('.footer-bottom');
+          if (!footerBottom) return false;
 
-  setTimeout(fixMobileChargerImage, 300);
-  setTimeout(fixMobileChargerImage, 1000);
-</script>
+          if (footerBottom.dataset.txCreditFixed === '1') return true;
+          footerBottom.dataset.txCreditFixed = '1';
 
-<script>
-  function fixOriginalFooterCredit() {
-    const footerBottom =
-      document.querySelector('.footer-bottom') ||
-      document.querySelector('.footer .footer-bottom');
+          footerBottom.innerHTML = `
+            <p class="custom-footer-line">
+              <span>Built by</span>
+              <a href="https://technical-x.com" target="_blank" rel="noopener" aria-label="Technical X">
+                <img src="/images/logo-footer.webp" alt="Technical X">
+              </a>
+              <span>© 2016 yourevcharge.com</span>
+            </p>
+          `;
 
-    if (!footerBottom) return;
+          return true;
+        };
 
-    footerBottom.innerHTML = `
-      <p class="custom-footer-line">
-        <span>Built by</span>
-        <a href="https://technical-x.com" target="_blank" rel="noopener" aria-label="Technical X">
-          <img src="/images/logo-footer.webp" alt="Technical X">
-        </a>
-        <span>© 2016 yourevcharge.com</span>
-      </p>
-    `;
-  }
+        let scheduled = false;
+        let completed = false;
 
-  window.addEventListener('load', fixOriginalFooterCredit);
+        const runFixes = () => {
+          scheduled = false;
+          const chargerFixed = applyMobileChargerFix();
+          const footerFixed = applyFooterCreditFix();
 
-  const footerObserver = new MutationObserver(fixOriginalFooterCredit);
-  footerObserver.observe(document.getElementById('root'), {
-    childList: true,
-    subtree: true
-  });
+          if (footerFixed && (chargerFixed || window.innerWidth > 720)) {
+            completed = true;
+            observer.disconnect();
+          }
+        };
 
-  setTimeout(fixOriginalFooterCredit, 300);
-  setTimeout(fixOriginalFooterCredit, 1000);
-</script>
+        const scheduleRun = () => {
+          if (completed || scheduled) return;
+          scheduled = true;
+          requestAnimationFrame(runFixes);
+        };
 
+        const root = document.getElementById('root');
+        const observer = new MutationObserver(scheduleRun);
+
+        if (root) {
+          observer.observe(root, { childList: true, subtree: true });
+        }
+
+        window.addEventListener('load', runFixes, { once: true });
+        window.addEventListener('resize', applyMobileChargerFix);
+
+        [50, 300, 1000, 2000].forEach((delay) => {
+          setTimeout(runFixes, delay);
+        });
+      })();
+    </script>
   </body>
 </html>
