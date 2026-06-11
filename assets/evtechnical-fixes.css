@@ -234,18 +234,21 @@
   }
 }
 
-/* Mobile fix only for the charger image inside story section */
-@media (max-width: 768px){
-  .story-mobile-list > :nth-child(1){
+@media (width <= 720px){
+  html body #root .sticky-story .story-mobile-list > article.story-mobile-step:first-of-type > div.story-mobile-image{
+    height:clamp(380px, 112vw, 520px) !important;
     background:#d8d3ca !important;
     overflow:hidden !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
   }
 
-  .story-mobile-list > :nth-child(1) img{
-    object-fit:contain !important;
-    object-position:center center !important;
+  html body #root .sticky-story .story-mobile-list > article.story-mobile-step:first-of-type > div.story-mobile-image > img{
     width:100% !important;
     height:100% !important;
+    object-fit:contain !important;
+    object-position:center center !important;
     background:#d8d3ca !important;
   }
 }
