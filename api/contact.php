@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 const SMTP_HOST = 'smtp.hostinger.com';
 const SMTP_PORT = 465;
 const SMTP_USERNAME = 'booking@uaetechnical24.com';
-const SMTP_PASSWORD = '@+JPK7LMl3|z`NugRn!a';
+const SMTP_PASSWORD = '!!';
 const SMTP_FROM = 'booking@uaetechnical24.com';
 const SMTP_TO = 'booking@uaetechnical24.com';
 
