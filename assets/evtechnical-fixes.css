@@ -252,3 +252,198 @@
     background:#d8d3ca !important;
   }
 }
+
+/* Laptop only: make sticky story cards fit cleanly */
+@media (min-width:900px) and (max-height:900px){
+  .story-copy-card{
+    padding:38px 42px 32px !important;
+    overflow:hidden !important;
+  }
+
+  .story-copy-card :is(h2,h3){
+    font-size:clamp(2rem, 3.15vw, 3.25rem) !important;
+    line-height:.96 !important;
+    letter-spacing:-.055em !important;
+    margin-bottom:16px !important;
+  }
+
+  .story-copy-card p{
+    font-size:clamp(.84rem, 1vw, .96rem) !important;
+    line-height:1.42 !important;
+    margin-bottom:0 !important;
+  }
+}
+
+/* tighter laptop مثل 1366x768 */
+@media (min-width:900px) and (max-height:780px){
+  .story-copy-card{
+    padding:32px 38px 28px !important;
+  }
+
+  .story-copy-card :is(h2,h3){
+    font-size:clamp(1.8rem, 2.85vw, 2.85rem) !important;
+    line-height:.94 !important;
+    margin-bottom:12px !important;
+  }
+
+  .story-copy-card p{
+    font-size:.8rem !important;
+    line-height:1.35 !important;
+  }
+}
+
+/* Laptop/Desktop: make Who We Are image fill the card and focus on charger */
+@media (min-width:900px){
+  .split-section .split-image{
+    height:clamp(520px, 62vh, 680px) !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  .split-section .split-image img{
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    object-position:left top !important;
+  }
+}
+
+/* Laptop/Desktop: make Why Choose Us image fill the card */
+@media (min-width:900px){
+  .why-section .why-image{
+    height:clamp(520px, 62vh, 680px) !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  .why-section .why-image img{
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    object-position:55% center !important;
+  }
+}
+
+/* Laptop/Desktop: make Emergency image fill the card */
+@media (min-width:900px){
+  .emergency-section .emergency-image{
+    height:clamp(520px, 62vh, 680px) !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  .emergency-section .emergency-image img{
+    width:100% !important;
+    height:100% !important;
+    object-fit:cover !important;
+    object-position:left top !important;
+  }
+}
+
+/* Mobile footer credit: one small line, no huge bottom space */
+@media (max-width:720px){
+  .footer{
+    padding:18px 0 18px !important;
+    gap:10px !important;
+    margin-bottom:0 !important;
+  }
+
+  .footer-bottom{
+    padding-top:10px !important;
+    gap:0 !important;
+    margin-bottom:0 !important;
+  }
+
+  .custom-footer-line{
+    width:100% !important;
+    margin:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:5px !important;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    font-size:10.5px !important;
+    line-height:1 !important;
+  }
+
+  .custom-footer-line a{
+    flex:0 0 auto !important;
+    display:inline-flex !important;
+    align-items:center !important;
+  }
+
+  .custom-footer-line img{
+    height:14px !important;
+    width:auto !important;
+    max-width:94px !important;
+    margin:0 !important;
+    display:block !important;
+  }
+
+  .custom-footer-line span{
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
+  }
+}
+
+/* Footer compact spacing: desktop + mobile */
+.footer{
+  padding:22px 0 18px !important;
+  gap:8px !important;
+  margin-bottom:0 !important;
+}
+
+.footer-bottom{
+  padding-top:8px !important;
+  gap:0 !important;
+  margin:0 !important;
+  min-height:0 !important;
+}
+
+.footer-bottom p,
+.custom-footer-line{
+  margin:0 !important;
+}
+
+/* keep credit line clean */
+.custom-footer-line{
+  line-height:1 !important;
+  align-items:center !important;
+}
+
+/* Mobile: smaller one-line footer */
+@media (max-width:720px){
+  .footer{
+    padding:12px 0 10px !important;
+    gap:6px !important;
+  }
+
+  .footer-bottom{
+    padding-top:6px !important;
+  }
+
+  .custom-footer-line{
+    font-size:10px !important;
+    gap:5px !important;
+    white-space:nowrap !important;
+    flex-wrap:nowrap !important;
+    overflow:hidden !important;
+  }
+
+  .custom-footer-line img{
+    height:13px !important;
+    max-width:86px !important;
+    margin:0 !important;
+  }
+}
+
+.nav-links a.is-active{
+  color:var(--text) !important;
+}
+
+.nav-links a.is-active::after{
+  opacity:1 !important;
+  transform:scaleX(1) !important;
+}
