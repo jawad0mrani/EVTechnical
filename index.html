@@ -217,5 +217,136 @@
         });
       })();
     </script>
+    
+    <script>
+  (() => {
+    const navMap = [
+      { label: 'Story', id: 'story', selector: '.sticky-story' },
+      { label: 'Services', id: 'services', selector: '.service-grid' },
+      { label: 'Why Us', id: 'why-us', selector: '.why-section' },
+      { label: 'Process', id: 'process', selector: '.timeline' },
+      { label: 'FAQ', id: 'faq', selector: '.faq-section' }
+    ];
+
+    const getSectionRoot = (selector) => {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+
+      return (
+        el.closest('section') ||
+        el.closest('.content-section') ||
+        el.closest('.split-section') ||
+        el.closest('.sticky-story') ||
+        el.closest('.showcase-section') ||
+        el.closest('.why-section') ||
+        el.closest('.faq-section') ||
+        el
+      );
+    };
+
+    const setupNavSpy = () => {
+      const nav = document.querySelector('.nav-links');
+      if (!nav) return false;
+
+      const links = Array.from(nav.querySelectorAll('a'));
+      if (!links.length) return false;
+
+      const sections = navMap
+        .map((item) => {
+          const section = getSectionRoot(item.selector);
+          if (!section) return null;
+
+          section.id = item.id;
+
+          const link = links.find((a) => {
+            const text = a.textContent.trim().toLowerCase();
+            return text === item.label.toLowerCase();
+          });
+
+          if (link) {
+            link.href = `#${item.id}`;
+            link.dataset.spyTarget = item.id;
+          }
+
+          return { ...item, section, link };
+        })
+        .filter(Boolean);
+
+      if (!sections.length) return false;
+
+      const setActive = (id) => {
+        links.forEach((link) => {
+          link.classList.toggle('is-active', link.dataset.spyTarget === id);
+        });
+      };
+
+      const updateActive = () => {
+        const marker = window.scrollY + window.innerHeight * 0.38;
+
+        let current = sections[0];
+
+        for (const item of sections) {
+          if (item.section.offsetTop <= marker) {
+            current = item;
+          }
+        }
+
+        if (current) setActive(current.id);
+      };
+
+      links.forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const id = link.dataset.spyTarget;
+          const target = id ? document.getElementById(id) : null;
+
+          if (!target) return;
+
+          e.preventDefault();
+
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+
+          history.replaceState(null, '', `#${id}`);
+          setActive(id);
+        });
+      });
+
+      let ticking = false;
+
+      window.addEventListener('scroll', () => {
+        if (ticking) return;
+
+        ticking = true;
+
+        requestAnimationFrame(() => {
+          updateActive();
+          ticking = false;
+        });
+      }, { passive: true });
+
+      window.addEventListener('resize', updateActive);
+
+      setTimeout(updateActive, 100);
+      setTimeout(updateActive, 800);
+
+      return true;
+    };
+
+    let tries = 0;
+
+    const timer = setInterval(() => {
+      tries++;
+
+      if (setupNavSpy() || tries > 40) {
+        clearInterval(timer);
+      }
+    }, 100);
+
+    window.addEventListener('load', setupNavSpy, { once: true });
+  })();
+</script>
+    
   </body>
 </html>
