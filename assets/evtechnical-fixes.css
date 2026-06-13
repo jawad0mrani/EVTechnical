@@ -933,3 +933,93 @@
     animation: none !important;
   }
 }
+
+
+/* Strong host styling for Who We Are box gallery */
+.split-section .split-image.box-gallery-host {
+  min-height: 640px !important;
+  height: clamp(560px, 68vh, 720px) !important;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(103, 232, 249, 0.16), transparent 34%),
+    radial-gradient(circle at 20% 20%, rgba(57, 243, 187, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)) !important;
+  border: 1px solid rgba(103, 232, 249, 0.22) !important;
+  border-radius: 38px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  perspective: 1300px !important;
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+@media (min-width: 768px) and (max-width: 1366px) {
+  .split-section .split-image.box-gallery-host {
+    height: 560px !important;
+    min-height: 560px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .split-section .split-image.box-gallery-host {
+    height: 520px !important;
+    min-height: 520px !important;
+    margin-top: 28px !important;
+    border-radius: 30px !important;
+  }
+}
+
+
+
+/* Premium smooth orbit gallery override */
+.box-3d-showcase.orbit-gallery {
+  perspective: 1400px !important;
+}
+
+.box-3d-showcase.orbit-gallery::before {
+  inset: 16% !important;
+  border: 1px solid rgba(103, 232, 249, 0.16) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(ellipse at center, transparent 52%, rgba(103, 232, 249, 0.16) 53%, transparent 57%) !important;
+  filter: blur(0) !important;
+  opacity: 0.75 !important;
+  animation: orbitRingSpin 24s linear infinite !important;
+}
+
+.box-3d-showcase.orbit-gallery .box-3d-card {
+  animation: none !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform-origin: center center !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity, filter !important;
+  transition:
+    box-shadow 0.45s ease,
+    border-color 0.45s ease,
+    filter 0.45s ease !important;
+}
+
+.box-3d-showcase.orbit-gallery .box-3d-card img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.06), rgba(5,10,15,0.8)) !important;
+}
+
+.box-3d-showcase.orbit-gallery .box-3d-card.is-center {
+  border-color: rgba(103, 232, 249, 0.58) !important;
+  box-shadow:
+    0 42px 120px rgba(0, 0, 0, 0.62),
+    0 0 55px rgba(103, 232, 249, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+@keyframes orbitRingSpin {
+  from {
+    transform: rotateX(64deg) rotateZ(0deg);
+  }
+
+  to {
+    transform: rotateX(64deg) rotateZ(360deg);
+  }
+}
