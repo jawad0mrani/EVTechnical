@@ -388,43 +388,214 @@
 })();
 </script>
     
-    
+
 <script>
 (() => {
   const buildBoxShowcase = () => {
-    const whoSection = Array.from(document.querySelectorAll('.split-section'))
-      .find(section => section.textContent.includes('WHO WE ARE'));
+    const sections = Array.from(document.querySelectorAll('.split-section'));
 
-    if (!whoSection) return;
+    const whoSection = sections.find((section) => {
+      const text = (section.textContent || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+      return (
+        text.includes('who we are') ||
+        text.includes('technical ev charging partner')
+      );
+    });
+
+    if (!whoSection) return false;
 
     const imageBox = whoSection.querySelector('.split-image');
-    if (!imageBox || imageBox.dataset.boxShowcaseReady === '1') return;
+    if (!imageBox) return false;
+
+    if (imageBox.querySelector('.box-3d-showcase')) return true;
 
     imageBox.dataset.boxShowcaseReady = '1';
+    imageBox.classList.add('box-gallery-host');
 
     imageBox.innerHTML = `
       <div class="box-3d-showcase" aria-label="EVTechnical charger box gallery">
-        ${[1,2,3,4,5,6,7].map((n) => `
+        ${[1, 2, 3, 4, 5, 6, 7].map((n) => `
           <figure class="box-3d-card box-card-${n}">
             <img src="/images/box/${n}.png" alt="EVTechnical charger box view ${n}" loading="lazy">
           </figure>
         `).join('')}
+
         <div class="box-3d-core">
           <span>EVTechnical</span>
           <strong>Charger Hardware</strong>
         </div>
       </div>
     `;
+
+    return true;
   };
 
-  buildBoxShowcase();
-  window.addEventListener('load', buildBoxShowcase);
+  const run = () => {
+    if (buildBoxShowcase()) {
+      return true;
+    }
 
-  const observer = new MutationObserver(buildBoxShowcase);
-  observer.observe(document.body, { childList: true, subtree: true });
+    return false;
+  };
+
+  run();
+
+  const root = document.getElementById('root') || document.body;
+
+  const observer = new MutationObserver(() => {
+    if (run()) {
+      observer.disconnect();
+    }
+  });
+
+  observer.observe(root, {
+    childList: true,
+    subtree: true
+  });
+
+  window.addEventListener('load', run);
+
+  [100, 300, 800, 1500, 3000].forEach((delay) => {
+    setTimeout(run, delay);
+  });
 })();
 </script>
-    
+
+<script>
+(() => {
+  const initSmoothBoxOrbit = () => {
+    const stage = document.querySelector('.box-3d-showcase');
+    if (!stage || stage.dataset.smoothOrbitReady === '1') return false;
+
+    const cards = Array.from(stage.querySelectorAll('.box-3d-card'));
+    if (!cards.length) return false;
+
+    stage.dataset.smoothOrbitReady = '1';
+    stage.classList.add('orbit-gallery');
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return true;
+
+    const count = cards.length;
+    const duration = 21000;
+    const orbitSpeed = 0.11;
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+
+    const centerPulse = (t) => {
+      if (t < 0.24) return smoother(t / 0.24);
+      if (t < 0.58) return 1;
+      return 1 - smoother((t - 0.58) / 0.42);
+    };
+
+    let start = performance.now();
+    let rafId = null;
+
+    const animate = (now) => {
+      const rect = stage.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      const mobile = w < 520;
+
+      const rx = mobile
+        ? clamp(w * 0.31, 95, 135)
+        : clamp(w * 0.34, 160, 245);
+
+      const ry = mobile
+        ? clamp(h * 0.34, 135, 185)
+        : clamp(h * 0.30, 150, 220);
+
+      const progress = ((now - start) % duration) / duration;
+      const activeFloat = progress * count;
+
+      cards.forEach((card, i) => {
+        const baseAngle =
+          ((i / count) + progress * orbitSpeed) * Math.PI * 2 - Math.PI / 2;
+
+        const baseX = Math.cos(baseAngle) * rx;
+        const baseY = Math.sin(baseAngle) * ry;
+
+        const depth = (Math.sin(baseAngle) + 1) / 2;
+
+        let local = (activeFloat - i + count) % count;
+        let center = local < 1 ? centerPulse(local) : 0;
+
+        const x = lerp(baseX, 0, center);
+        const y = lerp(baseY, 0, center);
+
+        const baseScale = lerp(0.68, 0.9, depth);
+        const scale = lerp(baseScale, mobile ? 1.12 : 1.22, center);
+
+        const z = Math.round(10 + depth * 28 + center * 120);
+        const opacity = lerp(0.48 + depth * 0.34, 1, center);
+        const brightness = lerp(0.78 + depth * 0.22, 1.16, center);
+        const blur = lerp(0.4, 0, center);
+
+        card.style.zIndex = z;
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = `brightness(${brightness.toFixed(3)}) blur(${blur.toFixed(2)}px)`;
+        card.style.transform = `
+          translate(-50%, -50%)
+          translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${center * 100}px)
+          scale(${scale.toFixed(3)})
+        `;
+
+        card.classList.toggle('is-center', center > 0.72);
+      });
+
+      rafId = requestAnimationFrame(animate);
+    };
+
+    const startAnimation = () => {
+      if (!rafId) rafId = requestAnimationFrame(animate);
+    };
+
+    const stopAnimation = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        startAnimation();
+      } else {
+        stopAnimation();
+      }
+    }, { threshold: 0.12 });
+
+    observer.observe(stage);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopAnimation();
+      else startAnimation();
+    });
+
+    startAnimation();
+    return true;
+  };
+
+  initSmoothBoxOrbit();
+
+  const root = document.getElementById('root') || document.body;
+  const observer = new MutationObserver(() => {
+    if (initSmoothBoxOrbit()) observer.disconnect();
+  });
+
+  observer.observe(root, { childList: true, subtree: true });
+
+  window.addEventListener('load', initSmoothBoxOrbit);
+})();
+</script>
+
 
   </body>
 </html>
