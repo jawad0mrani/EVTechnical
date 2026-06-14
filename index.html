@@ -131,6 +131,14 @@
     <link rel="stylesheet" crossorigin href="/assets/index-Dm3HuV_Z.css">
     <link rel="stylesheet" href="/assets/evtechnical-fixes.css">
     
+    <link rel="preload" as="image" href="/images/box/1.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/2.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/3.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/4.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/5.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/6.png" fetchpriority="low">
+    <link rel="preload" as="image" href="/images/box/7.png" fetchpriority="low">
+    
 <style>
 @media (min-width: 768px) {
   .charger-device-3d {
@@ -420,7 +428,12 @@
       <div class="box-3d-showcase" aria-label="EVTechnical charger box gallery">
         ${[1, 2, 3, 4, 5, 6, 7].map((n) => `
           <figure class="box-3d-card box-card-${n}">
-            <img src="/images/box/${n}.png" alt="EVTechnical charger box view ${n}" loading="lazy">
+            <img
+  src="/images/box/${n}.png"
+  alt="EVTechnical charger box view ${n}"
+  loading="eager"
+  decoding="async"
+>
           </figure>
         `).join('')}
 
@@ -467,112 +480,122 @@
 
 <script>
 (() => {
-  const initSmoothBoxOrbit = () => {
+  const initPremiumBoxOrbit = () => {
     const stage = document.querySelector('.box-3d-showcase');
-    if (!stage || stage.dataset.smoothOrbitReady === '1') return false;
+    if (!stage) return false;
 
     const cards = Array.from(stage.querySelectorAll('.box-3d-card'));
-    if (!cards.length) return false;
+    if (cards.length < 2) return false;
 
-    stage.dataset.smoothOrbitReady = '1';
-    stage.classList.add('orbit-gallery');
+    if (stage.dataset.premiumOrbitReady === '1') return true;
+
+    stage.dataset.premiumOrbitReady = '1';
+    stage.classList.add('premium-orbit-gallery');
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return true;
 
     const count = cards.length;
-    const duration = 21000;
-    const orbitSpeed = 0.11;
+    const focusDuration = 2600;
+    const orbitDuration = 17000;
 
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
     const lerp = (a, b, t) => a + (b - a) * t;
-    const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 
-    const centerPulse = (t) => {
-      if (t < 0.24) return smoother(t / 0.24);
-      if (t < 0.58) return 1;
-      return 1 - smoother((t - 0.58) / 0.42);
+    const easeInOut = (t) => {
+      t = clamp(t, 0, 1);
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const focusCurve = (p) => {
+      if (p < 0.28) return easeInOut(p / 0.28);
+      if (p < 0.68) return 1;
+      return 1 - easeInOut((p - 0.68) / 0.32);
     };
 
     let start = performance.now();
-    let rafId = null;
+    let raf = null;
 
-    const animate = (now) => {
+    const render = (now) => {
       const rect = stage.getBoundingClientRect();
       const w = rect.width;
       const h = rect.height;
-
       const mobile = w < 520;
 
-      const rx = mobile
-        ? clamp(w * 0.31, 95, 135)
-        : clamp(w * 0.34, 160, 245);
+      const rx = mobile ? clamp(w * 0.34, 105, 145) : clamp(w * 0.34, 170, 270);
+      const ry = mobile ? clamp(h * 0.34, 135, 190) : clamp(h * 0.30, 155, 235);
 
-      const ry = mobile
-        ? clamp(h * 0.34, 135, 185)
-        : clamp(h * 0.30, 150, 220);
-
-      const progress = ((now - start) % duration) / duration;
-      const activeFloat = progress * count;
+      const elapsed = now - start;
+      const active = Math.floor(elapsed / focusDuration) % count;
+      const phase = (elapsed % focusDuration) / focusDuration;
+      const orbitPhase = (elapsed / orbitDuration) * Math.PI * 2;
 
       cards.forEach((card, i) => {
-        const baseAngle =
-          ((i / count) + progress * orbitSpeed) * Math.PI * 2 - Math.PI / 2;
+        const angle = (i / count) * Math.PI * 2 + orbitPhase - Math.PI / 2;
 
-        const baseX = Math.cos(baseAngle) * rx;
-        const baseY = Math.sin(baseAngle) * ry;
+        const orbitX = Math.cos(angle) * rx;
+        const orbitY = Math.sin(angle) * ry;
 
-        const depth = (Math.sin(baseAngle) + 1) / 2;
+        const depth = (Math.sin(angle) + 1) / 2;
+        const isActive = i === active;
+        const pull = isActive ? focusCurve(phase) : 0;
 
-        let local = (activeFloat - i + count) % count;
-        let center = local < 1 ? centerPulse(local) : 0;
+        const float = Math.sin(elapsed / 700 + i * 1.7) * 6;
 
-        const x = lerp(baseX, 0, center);
-        const y = lerp(baseY, 0, center);
+        const x = lerp(orbitX, 0, pull);
+        const y = lerp(orbitY + float, 0, pull);
 
-        const baseScale = lerp(0.68, 0.9, depth);
-        const scale = lerp(baseScale, mobile ? 1.12 : 1.22, center);
+        const baseScale = lerp(0.66, 0.92, depth);
+        const scale = lerp(baseScale, mobile ? 1.16 : 1.28, pull);
 
-        const z = Math.round(10 + depth * 28 + center * 120);
-        const opacity = lerp(0.48 + depth * 0.34, 1, center);
-        const brightness = lerp(0.78 + depth * 0.22, 1.16, center);
-        const blur = lerp(0.4, 0, center);
+        const z = Math.round(10 + depth * 45 + pull * 220);
+        const opacity = lerp(0.46 + depth * 0.34, 1, pull);
+        const brightness = lerp(0.78 + depth * 0.24, 1.18, pull);
+        const blur = lerp(0.55, 0, pull);
 
-        card.style.zIndex = z;
-        card.style.opacity = opacity.toFixed(3);
-        card.style.filter = `brightness(${brightness.toFixed(3)}) blur(${blur.toFixed(2)}px)`;
-        card.style.transform = `
-          translate(-50%, -50%)
-          translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${center * 100}px)
-          scale(${scale.toFixed(3)})
-        `;
+        card.style.setProperty('z-index', z, 'important');
+        card.style.setProperty('opacity', opacity.toFixed(3), 'important');
+        card.style.setProperty(
+          'filter',
+          `brightness(${brightness.toFixed(3)}) blur(${blur.toFixed(2)}px)`,
+          'important'
+        );
 
-        card.classList.toggle('is-center', center > 0.72);
+        card.style.setProperty(
+          'transform',
+          `
+            translate(-50%, -50%)
+            translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${Math.round(pull * 150 + depth * 35)}px)
+            scale(${scale.toFixed(3)})
+          `,
+          'important'
+        );
+
+        card.classList.toggle('is-center', pull > 0.72);
       });
 
-      rafId = requestAnimationFrame(animate);
+      raf = requestAnimationFrame(render);
     };
 
     const startAnimation = () => {
-      if (!rafId) rafId = requestAnimationFrame(animate);
+      if (!raf) raf = requestAnimationFrame(render);
     };
 
     const stopAnimation = () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = null;
       }
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0]?.isIntersecting) {
-        startAnimation();
-      } else {
-        stopAnimation();
-      }
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) startAnimation();
+      else stopAnimation();
     }, { threshold: 0.12 });
 
-    observer.observe(stage);
+    visibilityObserver.observe(stage);
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stopAnimation();
@@ -583,16 +606,72 @@
     return true;
   };
 
-  initSmoothBoxOrbit();
+  initPremiumBoxOrbit();
 
-  const root = document.getElementById('root') || document.body;
   const observer = new MutationObserver(() => {
-    if (initSmoothBoxOrbit()) observer.disconnect();
+    if (initPremiumBoxOrbit()) {
+      observer.disconnect();
+    }
   });
 
-  observer.observe(root, { childList: true, subtree: true });
+  observer.observe(document.getElementById('root') || document.body, {
+    childList: true,
+    subtree: true
+  });
 
-  window.addEventListener('load', initSmoothBoxOrbit);
+  window.addEventListener('load', initPremiumBoxOrbit);
+})();
+</script>
+
+
+<script>
+(() => {
+  const canRun =
+    window.matchMedia('(pointer: fine) and (hover: hover)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!canRun || document.querySelector('.tx-cursor-dot')) return;
+
+  const dot = document.createElement('div');
+  dot.className = 'tx-cursor-dot';
+  document.body.appendChild(dot);
+
+  let pending = false;
+  let x = -100;
+  let y = -100;
+
+  const move = () => {
+    pending = false;
+    dot.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+  };
+
+  window.addEventListener('mousemove', (e) => {
+    x = e.clientX;
+    y = e.clientY;
+
+    document.body.classList.add('tx-cursor-ready');
+
+    if (!pending) {
+      pending = true;
+      requestAnimationFrame(move);
+    }
+  }, { passive: true });
+
+  window.addEventListener('mouseleave', () => {
+    document.body.classList.remove('tx-cursor-ready');
+  });
+
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('a, button, input, textarea, select, [role="button"]')) {
+      document.body.classList.add('tx-cursor-hover');
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('a, button, input, textarea, select, [role="button"]')) {
+      document.body.classList.remove('tx-cursor-hover');
+    }
+  });
 })();
 </script>
 
