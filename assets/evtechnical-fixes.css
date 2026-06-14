@@ -452,15 +452,83 @@
 
 
 
-
-/* Simple dot cursor - ultra lightweight */
+/* Animated breathing cursor dot */
 @media (pointer: fine) and (hover: hover) {
   html,
   body,
   body * {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='3.6' fill='%23365f6c'/%3E%3C/svg%3E") 6 6, auto !important;
+    cursor: none !important;
+  }
+
+  .tx-cursor-dot {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 13px;
+    height: 13px;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 2147483647;
+    transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+    background: #5fd7e7;
+    box-shadow:
+      0 0 10px rgba(95, 215, 231, 0.45),
+      0 0 22px rgba(95, 215, 231, 0.18);
+    opacity: 0;
+    contain: layout paint style;
+    will-change: transform, width, height, background-color, box-shadow;
+    animation: txCursorBreath 1.85s ease-in-out infinite;
+  }
+
+  body.tx-cursor-ready .tx-cursor-dot {
+    opacity: 1;
+  }
+
+  body.tx-cursor-hover .tx-cursor-dot {
+    width: 18px;
+    height: 18px;
+    background: #274c58;
+    box-shadow:
+      0 0 14px rgba(95, 215, 231, 0.36),
+      0 0 28px rgba(95, 215, 231, 0.16);
+  }
+
+  @keyframes txCursorBreath {
+    0%,
+    100% {
+      width: 11px;
+      height: 11px;
+      background: #68e7f4;
+      box-shadow:
+        0 0 8px rgba(104, 231, 244, 0.42),
+        0 0 18px rgba(104, 231, 244, 0.16);
+    }
+
+    50% {
+      width: 17px;
+      height: 17px;
+      background: #2f6673;
+      box-shadow:
+        0 0 12px rgba(47, 102, 115, 0.52),
+        0 0 26px rgba(47, 102, 115, 0.22);
+    }
   }
 }
+
+@media (pointer: coarse), (hover: none), (prefers-reduced-motion: reduce) {
+  .tx-cursor-dot {
+    display: none !important;
+  }
+
+  html,
+  body,
+  body * {
+    cursor: auto !important;
+  }
+}
+
+
+
 
 @media (min-width: 768px) {
   .charger-device-3d img {
@@ -1015,6 +1083,52 @@
 }
 
 @keyframes orbitRingSpin {
+  from {
+    transform: rotateX(64deg) rotateZ(0deg);
+  }
+
+  to {
+    transform: rotateX(64deg) rotateZ(360deg);
+  }
+}
+
+
+/* Kill old weak animation and force premium orbit */
+.box-3d-showcase.premium-orbit-gallery .box-3d-card {
+  animation: none !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform-origin: center center !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity, filter !important;
+}
+
+.box-3d-showcase.premium-orbit-gallery .box-3d-card img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,0.06), rgba(5,10,15,0.88)) !important;
+}
+
+.box-3d-showcase.premium-orbit-gallery .box-3d-card.is-center {
+  border-color: rgba(103, 232, 249, 0.7) !important;
+  box-shadow:
+    0 44px 130px rgba(0, 0, 0, 0.68),
+    0 0 70px rgba(103, 232, 249, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+}
+
+.box-3d-showcase.premium-orbit-gallery::before {
+  inset: 13% !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(ellipse at center, transparent 54%, rgba(103, 232, 249, 0.20) 55%, transparent 60%) !important;
+  filter: none !important;
+  opacity: 0.65 !important;
+  animation: premiumOrbitRing 14s linear infinite !important;
+}
+
+@keyframes premiumOrbitRing {
   from {
     transform: rotateX(64deg) rotateZ(0deg);
   }
